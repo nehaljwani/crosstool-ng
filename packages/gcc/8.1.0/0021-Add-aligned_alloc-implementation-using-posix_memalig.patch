@@ -1,0 +1,36 @@
+From c4732e9d6b91011b006ab8973f41bede5092e471 Mon Sep 17 00:00:00 2001
+From: Nehal J Wani <nehaljw.kkd1@gmail.com>
+Date: Sun, 10 Jun 2018 02:25:54 -0500
+Subject: [PATCH] Add aligned_alloc implementation using posix_memalign
+
+---
+ libstdc++-v3/include/c_global/cstdlib | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/libstdc++-v3/include/c_global/cstdlib b/libstdc++-v3/include/c_global/cstdlib
+index 1033501..d4cbb13 100644
+--- a/libstdc++-v3/include/c_global/cstdlib
++++ b/libstdc++-v3/include/c_global/cstdlib
+@@ -130,6 +130,19 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+   using ::abort;
+ #if __cplusplus >= 201703L && defined(_GLIBCXX_HAVE_ALIGNED_ALLOC)
+   using ::aligned_alloc;
++#elif defined(_GLIBCXX_HAVE_POSIX_MEMALIGN)
++inline void*
++aligned_alloc (std::size_t al, std::size_t sz)
++{
++  void *ptr;
++  // The value of alignment shall be a power of two multiple of sizeof(void *).
++  if (al < sizeof(void*))
++    al = sizeof(void*);
++  int ret = posix_memalign (&ptr, al, sz);
++  if (ret == 0)
++    return ptr;
++  return NULL;
++}
+ #endif
+   using ::atexit;
+ #if __cplusplus >= 201103L
+-- 
+1.8.3.1
+
